@@ -2,15 +2,16 @@ package gowired
 
 import (
 	"fmt"
-	"go-wired/errors"
 	"reflect"
+	"go-wired/errors"
+	"go-wired/models"
 )
 
 //Factory its the one who handles the creation of other objects///
 type Factory struct {
 	Components     []interface{}
-	store          map[string]*Element
-	interfacesImpl map[string]*Element
+	store          map[string]*models.Blueprint
+	interfacesImpl map[string]*models.Blueprint
 }
 
 //Init should init the node
@@ -41,29 +42,28 @@ func (factory *Factory) Init() {
 func (factory *Factory) GetComponent(descripcion interface{}) interface{} {
 	//get the type of the component that to return.
 	typeDesc := reflect.TypeOf(descripcion)
-	fmt.Printf("Getting value of %v \n", typeDesc.Name())
-	fmt.Printf("%v \n", factory.store)
+
 	//search for the component on the store if the component exist it will be returned
 	// otherwise will return nil
 	if comp, have := factory.store[typeDesc.Name()]; have {
-		return comp.Element
+		return comp.models.Blueprint
 	}
 
 	return nil
 }
 
-//AddBlueprint register a obj as a element of the node
-func (factory *Factory) AddBlueprint(obj interface{}) (ele *Element, err error) {
-	//Check that the store its initialized before attempting to store a blueprint
+//AddBlueprint register a obj as a models.Blueprint of the node
+func (factory *Factory) AddBlueprint(obj interface{}) (ele *models.Blueprint, err error) {
+	//Check that the store its initialized before attempting to store a Blueprint
 	if factory.store == nil {
-		factory.store = make(map[string]*Element)
-		factory.interfacesImpl = make(map[string]*Element)
+		factory.store = make(map[string]*models.Blueprint)
+		factory.interfacesImpl = make(map[string]*models.Blueprint)
 	}
 
 	val := reflect.ValueOf(obj).Elem()
 	typeOfT := val.Type()
 
-	//element that have the tag of implements
+	//models.Blueprint that have the tag of implements
 	field, itImplementField := typeOfT.FieldByName("implements")
 	if itImplementField == false {
 		return nil, errors.MissingImplementationTag{Name: typeOfT.Name()}
@@ -71,9 +71,9 @@ func (factory *Factory) AddBlueprint(obj interface{}) (ele *Element, err error) 
 
 	deps, fields := getDependencies(obj)
 
-	ele = &Element{
-		Name:    typeOfT.Name(),
-		Element: obj,
+	ele = &models.Blueprint{
+		Name:             typeOfT.Name(),
+		models.Blueprint: obj,
 		interfaces: []string{
 			field.Tag.Get("implements"),
 		},

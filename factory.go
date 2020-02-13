@@ -1,92 +1,46 @@
 package gowired
 
 import (
-	"fmt"
-	"reflect"
-	"go-wired/errors"
-	"go-wired/models"
+	"github.com/go-wired/models"
 )
 
 //Factory its the one who handles the creation of other objects///
 type Factory struct {
-	Components     []interface{}
-	store          map[string]*models.Blueprint
+	blueprints     *BlueprintMap
 	interfacesImpl map[string]*models.Blueprint
 }
 
-//Init should init the node
-func (factory *Factory) Init() {
-	//just register the components on the slice of Components
-	for i := 0; i < len(factory.Components); i++ {
-		factory.AddBlueprint(factory.Components[i])
-	}
-
-	for _, p := range factory.store {
-
-		for i := 0; i < len(p.dependencies); i++ {
-
-			dep := p.dependencies[i]
-
-			if storedDep, have := factory.interfacesImpl[dep]; have == true {
-				switch p.Kind {
-				case reflect.Struct:
-					fieldToChange := p.Value.FieldByName(p.fieldDep[dep].name)
-					fieldToChange.Set(storedDep.Value.Addr())
-				}
-			}
-		}
+//CreateFactory create a factory this its the constructor function
+//it initialize the bleprint map
+func CreateFactory() *Factory {
+	return &Factory{
+		blueprints: NewBlueprintMap(),
 	}
 }
 
-//GetComponent return a component instnace with all dependencies injected(singleton)
-func (factory *Factory) GetComponent(descripcion interface{}) interface{} {
-	//get the type of the component that to return.
-	typeDesc := reflect.TypeOf(descripcion)
-
-	//search for the component on the store if the component exist it will be returned
-	// otherwise will return nil
-	if comp, have := factory.store[typeDesc.Name()]; have {
-		return comp.models.Blueprint
-	}
-
-	return nil
+// AddBlueprint register/add a blueprint to he factory so it can be use it later on to build
+// the component
+func (f *Factory) AddBlueprint(itsSingleton bool, component interface{}, name string) {
+	Analize(component)
+	f.blueprints.AddBlueprint(
+		&models.Blueprint{ItsSingleton: itsSingleton, Name: name, Element: component})
 }
 
-//AddBlueprint register a obj as a models.Blueprint of the node
-func (factory *Factory) AddBlueprint(obj interface{}) (ele *models.Blueprint, err error) {
-	//Check that the store its initialized before attempting to store a Blueprint
-	if factory.store == nil {
-		factory.store = make(map[string]*models.Blueprint)
-		factory.interfacesImpl = make(map[string]*models.Blueprint)
+//CreateObjectByName create a object you can pass a name a object or anythin
+func (f *Factory) CreateObjectByName(name interface{}) (obj interface{}, err error) {
+	blueprint, err := f.blueprints.FindBlueprint(name)
+	if err != nil {
+		return nil, err
 	}
 
-	val := reflect.ValueOf(obj).Elem()
-	typeOfT := val.Type()
-
-	//models.Blueprint that have the tag of implements
-	field, itImplementField := typeOfT.FieldByName("implements")
-	if itImplementField == false {
-		return nil, errors.MissingImplementationTag{Name: typeOfT.Name()}
+	obj, err = f.BuildObject(blueprint)
+	if err != nil {
+		return nil, err
 	}
+	return
+}
 
-	deps, fields := getDependencies(obj)
-
-	ele = &models.Blueprint{
-		Name:             typeOfT.Name(),
-		models.Blueprint: obj,
-		interfaces: []string{
-			field.Tag.Get("implements"),
-		},
-		Type:         val.Type(),
-		Value:        val,
-		Kind:         val.Kind(),
-		fieldDep:     fields,
-		dependencies: deps,
-	}
-
-	factory.store[typeOfT.Name()] = ele
-	factory.interfacesImpl[field.Tag.Get("implements")] = ele
-
-	fmt.Printf("Storing VAL: %v \n", factory.store)
-	return ele, nil
+//BuildObject build and object using a blueprint
+func (f *Factory) BuildObject(blueprint *models.Blueprint) (obj interface{}, err error) {
+	return
 }

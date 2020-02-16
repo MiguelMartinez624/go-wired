@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	gowired "github.com/go-wired"
 )
 
@@ -11,13 +12,16 @@ type ComponentOne struct {
 type ComponentTwo struct {
 	Name          string
 	ID            string
-	dependencyOne ComponentOne
+	DependencyOne ComponentOne
 }
 
 func main() {
 	factory := gowired.CreateFactory()
 
-	factory.AddBlueprint(true, ComponentOne{}, "ComponentOne")
+	go factory.RunFactory()
 	factory.AddBlueprint(true, ComponentTwo{}, "ComponentTwo")
-	// factory.CreateObjectByName(ComponentOne{})
+
+	componentOne := factory.CreateObjectByName(ComponentTwo{}).(*ComponentTwo)
+	componentOne.DependencyOne.Name = "lolazo co'o e tu madre"
+	fmt.Println(componentOne)
 }

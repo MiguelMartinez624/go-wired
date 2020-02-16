@@ -10,7 +10,7 @@ type Blueprint struct {
 	Element      interface{}
 	fieldDep     map[string]FieldDep
 	interfaces   []string
-	Dependencies []string
+	Dependencies []FieldDep
 	Type         reflect.Type
 	Kind         reflect.Kind
 	Value        reflect.Value

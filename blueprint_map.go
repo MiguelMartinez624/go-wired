@@ -1,9 +1,9 @@
 package gowired
 
 import (
-	"fmt"
 	"reflect"
 
+	"github.com/go-wired/errors"
 	"github.com/go-wired/models"
 )
 
@@ -23,11 +23,8 @@ func NewBlueprintMap() *BlueprintMap {
 func (f *BlueprintMap) AddBlueprint(blueprint *models.Blueprint) {
 	if _, exist := f.blueprints[blueprint.Name]; !exist {
 		//Get the type of the element to store in the blueprint
-		elementType := reflect.TypeOf(blueprint.Element)
-		//Get the name of the component
-		blueprint.Name = elementType.Name()
-
 		f.blueprints[blueprint.Name] = blueprint
+		// fmt.Printf("added %v \n", blueprint.Name)
 	}
 }
 
@@ -37,16 +34,27 @@ func (f *BlueprintMap) FindBlueprint(identifier interface{}) (obj *models.Bluepr
 	switch kind {
 	case reflect.String:
 		//TODO get blueprint by name directly
-		// if _, exist := f.blueprints[name.(string)]; exist {
-		// 	//Use the @Blueprint
-		// }
-		break
+		name := identifier.(string)
+		obj, err = f.GetBlueprintByName(name)
+		return
 	case reflect.Struct:
-		//TODO get blueprint by getting the name from the @reflect.Type
-		fmt.Println(kind)
-
-		break
+		name := reflect.TypeOf(identifier).Name()
+		obj, err = f.GetBlueprintByName(name)
+		return
 
 	}
 	return
+}
+
+func (f *BlueprintMap) GetBlueprintByName(name string) (bp *models.Blueprint, err error) {
+	if blueprint, exist := f.blueprints[name]; exist {
+		return blueprint, nil
+	} else {
+		err = errors.BlueprintNotFound{BlueprintName: name}
+		return nil, err
+	}
+}
+
+func (f *BlueprintMap) Length() int {
+	return len(f.blueprints)
 }

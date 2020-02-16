@@ -1,23 +1,51 @@
 package gowired
 
 import (
-	"fmt"
-	"github.com/go-wired/models"
 	"reflect"
+
+	"github.com/go-wired/models"
 )
 
-func Analize(component interface{}) (blueprint *models.Blueprint) {
-	t := reflect.TypeOf(component)
-	// v := reflect.ValueOf(component)
-	blueprint = &models.Blueprint{}
-	for i := 0; i < t.NumField(); i++ {
-		//name of the field
-		// dependencyName := t.Field(i).Name
+type Analizer struct {
+	Output chan *models.Blueprint
+}
+
+func BuildAnalizer() *Analizer {
+	return &Analizer{
+		Output: make(chan *models.Blueprint),
+	}
+}
+
+func (a Analizer) Analize(component interface{}) {
+	componentType := reflect.TypeOf(component)
+	//Get the name of the component
+	blueprint := a.examineType(componentType)
+
+	a.Output <- blueprint
+}
+
+func (a Analizer) examineType(componentType reflect.Type) *models.Blueprint {
+	blueprint := &models.Blueprint{
+		Type:         componentType,
+		Name:         componentType.Name(),
+		Dependencies: make([]models.FieldDep, componentType.NumField()),
+	}
+
+	//Here we get dependenci information of this component
+	for i := 0; i < componentType.NumField(); i++ {
+		dependencyType := componentType.Field(i).Type
+		if dependencyType.Kind() == reflect.Struct {
+			blueprint.Dependencies = append(blueprint.Dependencies, models.FieldDep{
+				Index: i,
+				Name:  dependencyType.Name()})
+			//do process again
+			depBlueprint := a.examineType(dependencyType)
+			a.Output <- depBlueprint
+			// nned to added to the map but this can get really dep
+			// fmt.Printf("Dependnecy type:  %v\n", blueprint)
+		}
 		//this tis the type of te dependency
-		blueprint.Type = t.Field(i).Type
 
 	}
-	fmt.Printf("Blueprint:  %v\n", blueprint)
-
 	return blueprint
 }

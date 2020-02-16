@@ -5,9 +5,14 @@ import (
 	gowired "github.com/go-wired"
 )
 
-type ComponentOne struct {
+type GrandChild struct {
 	Name string
 	ID   string
+}
+
+type ComponentOne struct {
+	Name    string
+	NodeOne GrandChild
 }
 type ComponentTwo struct {
 	Name          string
@@ -18,10 +23,10 @@ type ComponentTwo struct {
 func main() {
 	factory := gowired.CreateFactory()
 
-	go factory.RunFactory()
 	factory.AddBlueprint(true, ComponentTwo{}, "ComponentTwo")
 
 	componentOne := factory.CreateObjectByName(ComponentTwo{}).(*ComponentTwo)
 	componentOne.DependencyOne.Name = "lolazo co'o e tu madre"
-	fmt.Println(componentOne)
+	componentOne.DependencyOne.NodeOne.Name = "YO soy el maldito abluelo"
+	fmt.Printf("%+v\n", componentOne)
 }

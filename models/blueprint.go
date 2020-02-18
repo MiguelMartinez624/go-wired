@@ -7,7 +7,6 @@ import "reflect"
 type Blueprint struct {
 	ItsSingleton bool
 	Name         string
-	Element      interface{}
 	fieldDep     map[string]FieldDep
 	interfaces   []string
 	Dependencies []FieldDep

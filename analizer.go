@@ -41,10 +41,8 @@ func (a Analizer) examineType(componentType reflect.Type) *models.Blueprint {
 			//do process again
 			depBlueprint := a.examineType(dependencyType)
 			a.Output <- depBlueprint
-			// nned to added to the map but this can get really dep
-			// fmt.Printf("Dependnecy type:  %v\n", blueprint)
+
 		}
-		//this tis the type of te dependency
 
 	}
 	return blueprint

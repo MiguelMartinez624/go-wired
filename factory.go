@@ -1,7 +1,6 @@
 package gowired
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/go-wired/models"
@@ -30,12 +29,11 @@ func CreateFactory() *Factory {
 //    its created it will make sure that its property stored on the map for
 //    later use
 func (f *Factory) RunFactory() {
+
+	//listen to incoming blueprints
 	for blueprint := range f.analizer.Output {
 		f.blueprints.AddBlueprint(blueprint)
-		fmt.Println(f.blueprints.Length())
-
 	}
-
 }
 
 // AddBlueprint register/add a blueprint to he factory so it can be use it later on to build

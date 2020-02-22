@@ -23,10 +23,11 @@ type ComponentTwo struct {
 func main() {
 	factory := gowired.CreateFactory()
 
-	factory.AddBlueprint(true, ComponentTwo{}, "ComponentTwo")
+	factory.AddBlueprint(false, ComponentTwo{}, "ComponentTwo")
 
 	componentOne := factory.CreateObjectByName(ComponentTwo{}).(*ComponentTwo)
+	componenttwo := factory.CreateObjectByName(ComponentTwo{}).(*ComponentTwo)
 	componentOne.DependencyOne.Name = "lolazo co'o e tu madre"
 	componentOne.DependencyOne.NodeOne.Name = "YO soy el maldito abluelo"
-	fmt.Printf("%+v\n", componentOne)
+	fmt.Println((componentOne == componenttwo))
 }

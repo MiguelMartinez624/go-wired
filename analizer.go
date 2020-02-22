@@ -17,18 +17,20 @@ func BuildAnalizer() *Analizer {
 }
 
 //Analize a object to createa  blueprint wit its dependencies.
-func (a Analizer) Analize(component interface{}) {
+func (a Analizer) Analize(itsSingleton bool, component interface{}) {
 	//Get the name of the component
 	componentType := reflect.TypeOf(component)
 
 	//Start analizin and examine the componente type
-	a.examineType(componentType)
+	blueprint := a.examineType(componentType)
+
+	blueprint.ItsSingleton = itsSingleton
 
 }
 
 //examineType check a type and extracts it dependencies, each type data get store on a blueprint
 // and its emited through a channel @Output
-func (a Analizer) examineType(componentType reflect.Type) {
+func (a Analizer) examineType(componentType reflect.Type) *models.Blueprint {
 	blueprint := &models.Blueprint{
 		Type:         componentType,
 		Name:         componentType.Name(),
@@ -51,4 +53,6 @@ func (a Analizer) examineType(componentType reflect.Type) {
 
 		}
 	}
+
+	return blueprint
 }

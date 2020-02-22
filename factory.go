@@ -9,16 +9,17 @@ import (
 //Factory its the one who handles the creation of other objects///
 type Factory struct {
 	blueprints     *BlueprintMap
-	interfacesImpl map[string]*models.Blueprint
 	analizer       *Analizer
+	objectsCreated map[string]interface{}
 }
 
 //CreateFactory create a factory this its the constructor function
 //it initialize the bleprint map
 func CreateFactory() *Factory {
 	factory := &Factory{
-		blueprints: NewBlueprintMap(),
-		analizer:   BuildAnalizer(),
+		blueprints:     NewBlueprintMap(),
+		analizer:       BuildAnalizer(),
+		objectsCreated: make(map[string]interface{}),
 	}
 	go factory.RunFactory()
 	return factory
@@ -39,7 +40,7 @@ func (f *Factory) RunFactory() {
 // AddBlueprint register/add a blueprint to he factory so it can be use it later on to build
 // the component
 func (f *Factory) AddBlueprint(itsSingleton bool, component interface{}, name string) {
-	f.analizer.Analize(component)
+	f.analizer.Analize(itsSingleton, component)
 }
 
 //CreateObjectByName create a object you can pass a name a object or anythin
@@ -48,6 +49,12 @@ func (f *Factory) CreateObjectByName(name interface{}) (obj interface{}) {
 	if err != nil {
 		panic(err)
 	}
+
+	//if its a singleton we check the builded object history map
+	if value, exist := f.objectsCreated[blueprint.Name]; blueprint.ItsSingleton && exist {
+		return value
+	}
+
 	//here we have the core object now we need to create its dependencies
 	prtVal, err := f.BuildObject(blueprint)
 	if err != nil {
@@ -56,6 +63,12 @@ func (f *Factory) CreateObjectByName(name interface{}) (obj interface{}) {
 	}
 	//Set all dependencies of the object.
 	f.setDependencies(prtVal, blueprint)
+
+	//if its a singleton we check that there its not other reference of this object and
+	// we stored this one for future use
+	if _, exist := f.objectsCreated[blueprint.Name]; blueprint.ItsSingleton && !exist {
+		f.objectsCreated[blueprint.Name] = prtVal.Interface()
+	}
 
 	return prtVal.Interface()
 }

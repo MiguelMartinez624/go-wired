@@ -9,8 +9,14 @@ type ComponentOne struct {
 	Name    string
 	NodeOne GrandChild
 }
+
 type ComponentTwo struct {
 	Name          string
 	ID            string
 	DependencyOne ComponentOne
+}
+
+type ComponentThree struct {
+	Name string
+	ID   string
 }

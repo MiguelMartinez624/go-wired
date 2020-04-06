@@ -1,7 +1,6 @@
 package gowired
 
 import (
-	"fmt"
 	"sync"
 
 	"github.com/go-wired/errors"
@@ -73,7 +72,6 @@ func (a Analizer) generateBlueprintChildsTree(schema *models.ObjectSchema, paren
 }
 
 func (a Analizer) FindSchema(obj interface{}) *models.ObjectSchema {
-	fmt.Println("START FINDING")
 	var tempSchema models.ObjectSchema
 	a.scanner.Scan(obj, &tempSchema)
 	mutex.Lock()

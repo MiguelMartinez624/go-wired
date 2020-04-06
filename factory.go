@@ -146,3 +146,12 @@ func (f *Factory) RegisterProvider(target interface{}, provider interface{}) {
 	f.providers[newProvider.SchemaID] = newProvider
 
 }
+
+func (f *Factory) RegisterObject(objct interface{}) {
+	schemaID := f.GenerateObjectSchema(objct)
+	_, err := f.CreateBlueprint(schemaID)
+	if err != nil {
+		panic(err)
+	}
+
+}

@@ -1,33 +1,23 @@
 package main
 
 import (
-	"fmt"
 	gowired "github.com/go-wired"
+	gowiredtest "github.com/go-wired/tests"
 )
 
-type GrandChild struct {
-	Name string
-	ID   string
-}
-
-type ComponentOne struct {
-	Name    string
-	NodeOne GrandChild
-}
-type ComponentTwo struct {
-	Name          string
-	ID            string
-	DependencyOne ComponentOne
-}
-
 func main() {
-	factory := gowired.CreateFactory()
+	for i := 0; i < 100; i++ {
+		f := gowired.CreateFactory()
 
-	factory.AddBlueprint(false, ComponentTwo{}, "ComponentTwo")
+		schemaID := f.GenerateObjectSchema(gowiredtest.ComponentOne{})
+		_, err := f.CreateBlueprint(schemaID)
+		if err != nil {
+			panic(err)
+		}
 
-	componentOne := factory.CreateObjectByName(ComponentTwo{}).(*ComponentTwo)
-	componenttwo := factory.CreateObjectByName(ComponentTwo{}).(*ComponentTwo)
-	componentOne.DependencyOne.Name = "lolazo co'o e tu madre"
-	componentOne.DependencyOne.NodeOne.Name = "YO soy el maldito abluelo"
-	fmt.Println((componentOne == componenttwo))
+		f.RegisterProvider("github.com/go-wired/tests.Dummer", gowiredtest.BasicDummer{})
+
+		// c := f.CreateObjectByName(gowiredtest.ComponentOne{}).(*gowiredtest.ComponentOne)
+		// c.DrummerImpl.Dumb()
+	}
 }

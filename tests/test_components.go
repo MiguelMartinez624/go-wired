@@ -1,13 +1,27 @@
 package gowiredtest
 
+import "fmt"
+
+type Dummer interface {
+	Dumb()
+}
+
+type BasicDummer struct {
+}
+
+func (d BasicDummer) Dumb() {
+	fmt.Println("LOL")
+}
+
 type GrandChild struct {
 	Name string
 	ID   string
 }
 
 type ComponentOne struct {
-	Name    string
-	NodeOne GrandChild
+	Name        string
+	NodeOne     GrandChild
+	DrummerImpl Dummer
 }
 
 type ComponentTwo struct {

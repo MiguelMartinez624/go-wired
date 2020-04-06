@@ -30,14 +30,14 @@ DI is focused on performance. It does not rely on reflection.
 A Blueprint contains a the data necesary to build and object its extracted using the 'reflect' library, and you can add one just by passing and object to be analize it.
 
 
-The blueprint can be added to a Factory with the `AddBlueprint` method:
+The blueprint can be create by the  Factory with the `CreateBlueprint` method:
 
 ```go
   //Initialize the factory
     factory := gowired.CreateFactory()
 
     //Register this component with the name 'ComponentTwo'
-	factory.AddBlueprint(true, ComponentTwo{}, "ComponentTwo")
+	factory.CreateBlueprint(true, ComponentTwo{}, "ComponentTwo")
 ```
 
 The object you pass to this method will be analized generating a blueprint that will be stored, this process

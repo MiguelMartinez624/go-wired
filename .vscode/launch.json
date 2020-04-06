@@ -9,7 +9,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${fileDirname}",
+            "program": "C:/Users/migue/go/src/github.com/go-wired/use-examples/use.go",
             "env": {},
             "args": []
         }

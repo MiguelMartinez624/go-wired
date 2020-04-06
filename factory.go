@@ -14,7 +14,6 @@ type Factory struct {
 	scanner        *Scanner
 	objectsCreated map[string]interface{}
 	objectSchema   map[string]*models.ObjectSchema
-	buildIns       map[string]*models.BuildInstruction
 	providers      map[string]*models.Provider
 }
 
@@ -26,7 +25,6 @@ func CreateFactory() *Factory {
 		scanner:        &Scanner{},
 		analizer:       BuildAnalizer(),
 		objectsCreated: make(map[string]interface{}),
-		buildIns:       make(map[string]*models.BuildInstruction),
 		objectSchema:   make(map[string]*models.ObjectSchema),
 		providers:      make(map[string]*models.Provider),
 	}
@@ -124,7 +122,7 @@ func (f *Factory) BuildObject(blueprint *models.Blueprint) (obj reflect.Value, e
 	var schemaToUse string
 
 	if provider, ok := f.providers[blueprint.SchemaID]; ok {
-		schemaToUse = provider.ToUseSchemaID
+		schemaToUse = provider.SchemaToUseID
 	} else {
 		schemaToUse = blueprint.SchemaID
 	}
@@ -143,7 +141,7 @@ func (f *Factory) RegisterProvider(target interface{}, provider interface{}) {
 	schemaProvider := f.analizer.Analize(provider)
 	targetSchema := f.analizer.FindSchema(target)
 
-	newProvider := &models.Provider{SchemaID: targetSchema.ID, ToUseSchemaID: schemaProvider.ID}
+	newProvider := &models.Provider{SchemaID: targetSchema.ID, SchemaToUseID: schemaProvider.ID}
 
 	f.providers[newProvider.SchemaID] = newProvider
 

@@ -2,7 +2,6 @@ package gowired
 
 import (
 	"reflect"
-	"sync"
 
 	"github.com/go-wired/models"
 )
@@ -25,34 +24,27 @@ func (s Scanner) FindName(obj interface{}) string {
 	}
 }
 
-func (c Scanner) ScanDeep(obj interface{}, out *models.ObjectSchema, wg *sync.WaitGroup, ch chan *models.ObjectSchema) {
+func (c Scanner) ScanDeep(obj interface{}, out *models.ObjectSchema, ch chan *models.ObjectSchema) {
 	c.Scan(obj, out)
 
-	if ch != nil {
-		ch <- out
-	}
-
-	defer wg.Done()
+	ch <- out
 
 	for i := 0; i < out.Type.NumField(); i++ {
 		dKind := out.Type.Field(i).Type.Kind()
 		var depout models.ObjectSchema
 
 		if dKind == reflect.Struct {
-			wg.Add(1)
-			go func(index int) {
-				c.ScanDeep(out.Type.Field(index).Type, &depout, wg, ch)
-				mutex.Lock()
-				out.FieldsMap[index] = &depout
-				mutex.Unlock()
-			}(i)
+
+			c.ScanDeep(out.Type.Field(i).Type, &depout, ch)
+			mutex.Lock()
+			out.FieldsMap[i] = &depout
+			mutex.Unlock()
 
 		} else if dKind == reflect.Interface {
 			c.Scan(out.Type.Field(i).Type, &depout)
 
-			if ch != nil {
-				ch <- &depout
-			}
+			ch <- &depout
+
 			mutex.Lock()
 			out.FieldsMap[i] = &depout
 			mutex.Unlock()

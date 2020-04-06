@@ -27,27 +27,20 @@ func BuildAnalizer() *Analizer {
 func (a Analizer) Analize(component interface{}) *models.ObjectSchema {
 	//Start analizin and examine the componente type
 	ch := make(chan *models.ObjectSchema)
-	defer close(ch)
-
-	var wg sync.WaitGroup
-	wg.Add(1)
 
 	var object models.ObjectSchema
-	go a.scanner.ScanDeep(component, &object, &wg, ch)
-
-	//channel to store al schemas
-
 	go func() {
-		for schema := range ch {
-			mutex.Lock()
-			a.objectsSchemas[schema.ID] = schema
-			mutex.Unlock()
+		defer close(ch)
+		a.scanner.ScanDeep(component, &object, ch)
+	}() //channel to store al schemas
 
-		}
-	}()
+	for schema := range ch {
+		mutex.Lock()
+		a.objectsSchemas[schema.ID] = schema
+		mutex.Unlock()
 
-	wg.Wait()
-	fmt.Println("DONE ANALIZE")
+	}
+
 	return &object
 }
 

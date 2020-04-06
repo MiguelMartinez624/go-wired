@@ -1,8 +1,8 @@
 package main
 
 import (
-	gowired "github.com/go-wired"
-	gowiredtest "github.com/go-wired/tests"
+	gowired "github.com/miguelmartinez624/go-wired"
+	gowiredtest "github.com/miguelmartinez624/go-wired/tests"
 )
 
 func main() {
@@ -10,7 +10,7 @@ func main() {
 		f := gowired.CreateFactory()
 		f.RegisterObject(gowiredtest.ComponentOne{})
 
-		f.RegisterProvider("github.com/go-wired/tests.Dummer", gowiredtest.BasicDummer{})
+		f.RegisterProvider("github.com/miguelmartinez624/go-wired/tests.Dummer", gowiredtest.BasicDummer{})
 
 		c := f.CreateObjectByName(gowiredtest.ComponentOne{}).(*gowiredtest.ComponentOne)
 		c.DrummerImpl.Dumb()

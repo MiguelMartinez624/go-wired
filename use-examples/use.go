@@ -8,16 +8,11 @@ import (
 func main() {
 	for i := 0; i < 100; i++ {
 		f := gowired.CreateFactory()
-
-		schemaID := f.GenerateObjectSchema(gowiredtest.ComponentOne{})
-		_, err := f.CreateBlueprint(schemaID)
-		if err != nil {
-			panic(err)
-		}
+		f.RegisterObject(gowiredtest.ComponentOne{})
 
 		f.RegisterProvider("github.com/go-wired/tests.Dummer", gowiredtest.BasicDummer{})
 
-		// c := f.CreateObjectByName(gowiredtest.ComponentOne{}).(*gowiredtest.ComponentOne)
-		// c.DrummerImpl.Dumb()
+		c := f.CreateObjectByName(gowiredtest.ComponentOne{}).(*gowiredtest.ComponentOne)
+		c.DrummerImpl.Dumb()
 	}
 }

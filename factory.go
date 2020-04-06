@@ -33,11 +33,9 @@ func CreateFactory() *Factory {
 
 // GenerateObjectSchema generate a tree schema of the object and its dependencies
 func (f *Factory) GenerateObjectSchema(component interface{}) string {
-
 	object := f.analizer.Analize(component)
 	//store object schema
 	f.objectSchema[object.ID] = object
-
 	return object.ID
 }
 
@@ -121,14 +119,16 @@ func (f *Factory) setDependencies(prtVal reflect.Value, blueprint *models.Bluepr
 func (f *Factory) BuildObject(blueprint *models.Blueprint) (obj reflect.Value, err error) {
 	var schemaToUse string
 
+	// Check if there its a provider to the object, if there its one
+	// for that schema it will have priority over de native (the one on the type)
 	if provider, ok := f.providers[blueprint.SchemaID]; ok {
 		schemaToUse = provider.SchemaToUseID
 	} else {
 		schemaToUse = blueprint.SchemaID
 	}
 
+	//Find the schema to be used.
 	objectSchema, err := f.analizer.FindSchemaByID(schemaToUse)
-
 	if err != nil {
 		panic(err)
 	}

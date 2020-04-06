@@ -3,7 +3,7 @@ package gowiredtest
 import (
 	"testing"
 
-	gowired "github.com/go-wired"
+	gowired "github.com/miguelmartinez624/go-wired"
 )
 
 type TestFunction = func(f *gowired.Factory, t *testing.T)

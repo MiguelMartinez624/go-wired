@@ -3,8 +3,8 @@ package gowired
 import (
 	"reflect"
 
-	"github.com/go-wired/errors"
-	"github.com/go-wired/models"
+	"github.com/miguelmartinez624/go-wired/errors"
+	"github.com/miguelmartinez624/go-wired/models"
 )
 
 //Factory its the one who handles the creation of other objects///

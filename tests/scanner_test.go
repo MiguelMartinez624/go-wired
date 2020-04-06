@@ -3,8 +3,8 @@ package gowiredtest
 import (
 	"testing"
 
-	gowired "github.com/go-wired"
-	"github.com/go-wired/models"
+	gowired "github.com/miguelmartinez624/go-wired"
+	"github.com/miguelmartinez624/go-wired/models"
 )
 
 type ScannerTestFunction = func(f *gowired.Scanner, t *testing.T)
@@ -47,7 +47,7 @@ func ScanShouldGetPackageTest(s *gowired.Scanner, t *testing.T) {
 		t.Error("Pakcage info not set.")
 	}
 
-	if result.Package != "github.com/go-wired/tests" {
+	if result.Package != "github.com/miguelmartinez624/go-wired/tests" {
 		t.Errorf("Invalid package name %v", result.Package)
 
 	}

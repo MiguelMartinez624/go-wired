@@ -3,8 +3,8 @@ package gowired
 import (
 	"sync"
 
-	"github.com/go-wired/errors"
-	"github.com/go-wired/models"
+	"github.com/miguelmartinez624/go-wired/errors"
+	"github.com/miguelmartinez624/go-wired/models"
 )
 
 var (

@@ -3,7 +3,7 @@ package gowired
 import (
 	"reflect"
 
-	"github.com/go-wired/models"
+	"github.com/miguelmartinez624/go-wired/models"
 )
 
 //Scanner its a wrappr for reflect standar pacakge

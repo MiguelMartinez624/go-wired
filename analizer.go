@@ -1,58 +1,104 @@
 package gowired
 
 import (
-	"reflect"
+	"fmt"
+	"sync"
 
+	"github.com/go-wired/errors"
 	"github.com/go-wired/models"
 )
 
+var (
+	mutex sync.Mutex
+)
+
 type Analizer struct {
-	Output chan *models.Blueprint
+	scanner        Scanner
+	objectsSchemas map[string]*models.ObjectSchema
 }
 
 func BuildAnalizer() *Analizer {
 	return &Analizer{
-		Output: make(chan *models.Blueprint),
+		objectsSchemas: make(map[string]*models.ObjectSchema),
 	}
 }
 
 //Analize a object to createa  blueprint wit its dependencies.
-func (a Analizer) Analize(itsSingleton bool, component interface{}) {
-	//Get the name of the component
-	componentType := reflect.TypeOf(component)
-
+func (a Analizer) Analize(component interface{}) *models.ObjectSchema {
 	//Start analizin and examine the componente type
-	blueprint := a.examineType(componentType)
+	ch := make(chan *models.ObjectSchema)
+	defer close(ch)
 
-	blueprint.ItsSingleton = itsSingleton
+	var wg sync.WaitGroup
+	wg.Add(1)
 
-}
+	var object models.ObjectSchema
+	go a.scanner.ScanDeep(component, &object, &wg, ch)
 
-//examineType check a type and extracts it dependencies, each type data get store on a blueprint
-// and its emited through a channel @Output
-func (a Analizer) examineType(componentType reflect.Type) *models.Blueprint {
-	blueprint := &models.Blueprint{
-		Type:         componentType,
-		Name:         componentType.Name(),
-		Dependencies: make([]models.FieldDep, componentType.NumField()),
-	}
-	//emit blueprint
-	a.Output <- blueprint
+	//channel to store al schemas
 
-	//Here we get dependenci information of this component
-	for i := 0; i < componentType.NumField(); i++ {
-		dependencyType := componentType.Field(i).Type
-
-		if dependencyType.Kind() == reflect.Struct {
-			blueprint.Dependencies = append(blueprint.Dependencies, models.FieldDep{
-				Index: i,
-				Name:  dependencyType.Name()})
-
-			//do process again
-			a.examineType(dependencyType)
+	go func() {
+		for schema := range ch {
+			mutex.Lock()
+			a.objectsSchemas[schema.ID] = schema
+			mutex.Unlock()
 
 		}
+	}()
+
+	wg.Wait()
+	fmt.Println("DONE ANALIZE")
+	return &object
+}
+
+func (a Analizer) GenerateBlueprint(schema *models.ObjectSchema) *models.Blueprint {
+	var out models.Blueprint
+	out.ID = schema.ID
+	out.SchemaID = schema.ID
+	out.Childs = make([]*models.Blueprint, 0)
+
+	for i, schemaDep := range schema.FieldsMap {
+		a.generateBlueprintChildsTree(schemaDep, &out, i)
 	}
 
-	return blueprint
+	return &out
+}
+
+func (a Analizer) generateBlueprintChildsTree(schema *models.ObjectSchema, parent *models.Blueprint, index int) {
+	bp := &models.Blueprint{
+
+		ID:       schema.ID,
+		SchemaID: schema.ID,
+		Index:    index,
+		Childs:   make([]*models.Blueprint, 0),
+	}
+
+	parent.Childs = append(parent.Childs, bp)
+	for i, schemaDep := range schema.FieldsMap {
+		a.generateBlueprintChildsTree(schemaDep, bp, i)
+	}
+}
+
+func (a Analizer) FindSchema(obj interface{}) *models.ObjectSchema {
+	fmt.Println("START FINDING")
+	var tempSchema models.ObjectSchema
+	a.scanner.Scan(obj, &tempSchema)
+	mutex.Lock()
+	schemaStored := a.objectsSchemas[tempSchema.ID]
+	mutex.Unlock()
+	if schemaStored == nil {
+		panic("no found")
+	}
+	return schemaStored
+}
+
+func (a Analizer) FindSchemaByID(schemaID string) (schema *models.ObjectSchema, err error) {
+
+	mutex.Lock()
+	schema = a.objectsSchemas[schemaID]
+	mutex.Unlock()
+	if schema == nil {
+		return nil, errors.NewSchemaNotFound(schemaID)
+	}
+	return schema, nil
 }

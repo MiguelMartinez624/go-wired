@@ -3,6 +3,7 @@ package gowired
 import (
 	"reflect"
 
+	"github.com/go-wired/errors"
 	"github.com/go-wired/models"
 )
 
@@ -10,7 +11,11 @@ import (
 type Factory struct {
 	blueprints     *BlueprintMap
 	analizer       *Analizer
+	scanner        *Scanner
 	objectsCreated map[string]interface{}
+	objectSchema   map[string]*models.ObjectSchema
+	buildIns       map[string]*models.BuildInstruction
+	providers      map[string]*models.Provider
 }
 
 //CreateFactory create a factory this its the constructor function
@@ -18,34 +23,43 @@ type Factory struct {
 func CreateFactory() *Factory {
 	factory := &Factory{
 		blueprints:     NewBlueprintMap(),
+		scanner:        &Scanner{},
 		analizer:       BuildAnalizer(),
 		objectsCreated: make(map[string]interface{}),
+		buildIns:       make(map[string]*models.BuildInstruction),
+		objectSchema:   make(map[string]*models.ObjectSchema),
+		providers:      make(map[string]*models.Provider),
 	}
-	go factory.RunFactory()
 	return factory
 }
 
-//RunFactory init all the process that the factory need for work
-// 1- Start listining for events from the analizer so each time a blueprint
-//    its created it will make sure that its property stored on the map for
-//    later use
-func (f *Factory) RunFactory() {
+// GenerateObjectSchema generate a tree schema of the object and its dependencies
+func (f *Factory) GenerateObjectSchema(component interface{}) string {
 
-	//listen to incoming blueprints
-	for blueprint := range f.analizer.Output {
-		f.blueprints.AddBlueprint(blueprint)
+	object := f.analizer.Analize(component)
+	//store object schema
+	f.objectSchema[object.ID] = object
+
+	return object.ID
+}
+
+// CreateBlueprint create a Object Schema with a schema ID
+func (f *Factory) CreateBlueprint(schemaID string) (ID string, err error) {
+
+	schema := f.objectSchema[schemaID]
+	if schema == nil {
+		return "", errors.NewSchemaNotFound(schemaID)
 	}
+
+	blueprint := f.analizer.GenerateBlueprint(schema)
+	f.blueprints.AddBlueprint(blueprint)
+	return blueprint.ID, nil
 }
 
-// AddBlueprint register/add a blueprint to he factory so it can be use it later on to build
-// the component
-func (f *Factory) AddBlueprint(itsSingleton bool, component interface{}, name string) {
-	f.analizer.Analize(itsSingleton, component)
-}
-
-//CreateObjectByName create a object you can pass a name a object or anythin
+// CreateObjectByName create a object you can pass a name a object or anythin
 func (f *Factory) CreateObjectByName(name interface{}) (obj interface{}) {
-	blueprint, err := f.blueprints.FindBlueprint(name)
+	targetSchema := f.analizer.FindSchema(name)
+	blueprint, err := f.blueprints.FindBlueprint(targetSchema.ID)
 	if err != nil {
 		panic(err)
 	}
@@ -61,8 +75,11 @@ func (f *Factory) CreateObjectByName(name interface{}) (obj interface{}) {
 		panic(err)
 
 	}
+
 	//Set all dependencies of the object.
-	f.setDependencies(prtVal, blueprint)
+	if blueprint.Childs != nil {
+		f.setDependencies(prtVal, blueprint)
+	}
 
 	//if its a singleton we check that there its not other reference of this object and
 	// we stored this one for future use
@@ -73,37 +90,61 @@ func (f *Factory) CreateObjectByName(name interface{}) (obj interface{}) {
 	return prtVal.Interface()
 }
 
-//setDependencies iterates though all @FieldDep and using the @Blueprints stored in
+// setDependencies iterates though all @FieldDep and using the @Blueprints stored in
 // the map it will procced to create and assign the value field, this its done on a
 // recursive manner so it guarantee the childs tree dependencies are fullfilled too
 func (f *Factory) setDependencies(prtVal reflect.Value, blueprint *models.Blueprint) {
 	//indiect the value of the Ptr to be able to work fields
 	val := reflect.Indirect(prtVal)
+
 	//For each dependencie on the @Blueprint it will get the blueprint dependency
 	//build and object and assing it to the correspondent field.
-	//
-	for _, dep := range blueprint.Dependencies {
-		//On the analize process some space are left on the array of dependencies
-		//this validate temporally that the index it have a valid @FieldDep value.
-		if dep.Name == "" {
+	for _, dep := range blueprint.Childs {
+		if dep == nil {
 			continue
 		}
-		depBluep, err := f.blueprints.GetBlueprintByName(dep.Name)
+		//On the analize process some space are left on the array of dependencies
+		//this validate temporally that the index it have a valid @FieldDep value.
+		if dep.SchemaID == "" {
+			continue
+		}
+		prtValDev, err := f.BuildObject(dep)
 		if err != nil {
 			panic(err)
+
 		}
 
-		//this its the dependency object instance pointer
-		valDepPtr := reflect.New(depBluep.Type)
-		f.setDependencies(valDepPtr, depBluep)
-		val.Field(dep.Index).Set(reflect.Indirect(valDepPtr))
-
+		val.Field(dep.Index).Set(reflect.Indirect(prtValDev))
+		f.setDependencies(prtValDev, dep)
 	}
 }
 
 //BuildObject build and object using a blueprint
 func (f *Factory) BuildObject(blueprint *models.Blueprint) (obj reflect.Value, err error) {
-	value := reflect.New(blueprint.Type)
+	var schemaToUse string
 
+	if provider, ok := f.providers[blueprint.SchemaID]; ok {
+		schemaToUse = provider.ToUseSchemaID
+	} else {
+		schemaToUse = blueprint.SchemaID
+	}
+
+	objectSchema, err := f.analizer.FindSchemaByID(schemaToUse)
+
+	if err != nil {
+		panic(err)
+	}
+	value := reflect.New(objectSchema.Type)
 	return value, nil
+}
+
+//  RegisterProvider way to store a provider
+func (f *Factory) RegisterProvider(target interface{}, provider interface{}) {
+	schemaProvider := f.analizer.Analize(provider)
+	targetSchema := f.analizer.FindSchema(target)
+
+	newProvider := &models.Provider{SchemaID: targetSchema.ID, ToUseSchemaID: schemaProvider.ID}
+
+	f.providers[newProvider.SchemaID] = newProvider
+
 }

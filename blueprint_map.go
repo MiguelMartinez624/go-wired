@@ -19,12 +19,17 @@ func NewBlueprintMap() *BlueprintMap {
 	}
 }
 
+func (f *BlueprintMap) ListenStream(in chan *models.Blueprint) {
+	for blueprint := range in {
+		f.AddBlueprint(blueprint)
+	}
+}
+
 //AddBlueprint register a blueprint to the list
 func (f *BlueprintMap) AddBlueprint(blueprint *models.Blueprint) {
-	if _, exist := f.blueprints[blueprint.Name]; !exist {
+	if _, exist := f.blueprints[blueprint.ID]; !exist {
 		//Get the type of the element to store in the blueprint
-		f.blueprints[blueprint.Name] = blueprint
-		// fmt.Printf("added %v \n", blueprint.Name)
+		f.blueprints[blueprint.ID] = blueprint
 	}
 }
 

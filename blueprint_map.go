@@ -2,31 +2,28 @@ package gowired
 
 import (
 	"reflect"
-
-	"github.com/miguelmartinez624/go-wired/errors"
-	"github.com/miguelmartinez624/go-wired/models"
 )
 
 //BlueprintMap its the store for blueprint
 type BlueprintMap struct {
-	blueprints map[string]*models.Blueprint
+	blueprints map[string]*Blueprint
 }
 
 //NewBlueprintMap contructor for Blueprint
 func NewBlueprintMap() *BlueprintMap {
 	return &BlueprintMap{
-		blueprints: make(map[string]*models.Blueprint, 10),
+		blueprints: make(map[string]*Blueprint, 10),
 	}
 }
 
-func (f *BlueprintMap) ListenStream(in chan *models.Blueprint) {
+func (f *BlueprintMap) ListenStream(in chan *Blueprint) {
 	for blueprint := range in {
 		f.AddBlueprint(blueprint)
 	}
 }
 
 //AddBlueprint register a blueprint to the list
-func (f *BlueprintMap) AddBlueprint(blueprint *models.Blueprint) {
+func (f *BlueprintMap) AddBlueprint(blueprint *Blueprint) {
 	if _, exist := f.blueprints[blueprint.ID]; !exist {
 		//Get the type of the element to store in the blueprint
 		f.blueprints[blueprint.ID] = blueprint
@@ -34,7 +31,7 @@ func (f *BlueprintMap) AddBlueprint(blueprint *models.Blueprint) {
 }
 
 //FindBlueprint find a @Blueprint
-func (f *BlueprintMap) FindBlueprint(identifier interface{}) (obj *models.Blueprint, err error) {
+func (f *BlueprintMap) FindBlueprint(identifier interface{}) (obj *Blueprint, err error) {
 	kind := reflect.TypeOf(identifier).Kind()
 	switch kind {
 	case reflect.String:
@@ -51,11 +48,11 @@ func (f *BlueprintMap) FindBlueprint(identifier interface{}) (obj *models.Bluepr
 	return
 }
 
-func (f *BlueprintMap) GetBlueprintByName(name string) (bp *models.Blueprint, err error) {
+func (f *BlueprintMap) GetBlueprintByName(name string) (bp *Blueprint, err error) {
 	if blueprint, exist := f.blueprints[name]; exist {
 		return blueprint, nil
 	} else {
-		err = errors.BlueprintNotFound{BlueprintName: name}
+		err = BlueprintNotFound{BlueprintName: name}
 		return nil, err
 	}
 }

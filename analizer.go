@@ -1,33 +1,28 @@
 package gowired
 
-import (
-	"github.com/miguelmartinez624/go-wired/errors"
-	"github.com/miguelmartinez624/go-wired/models"
-)
-
 //Analizer has the funcionality to scan and create blueprints and schemas of
 // objects that can be use to know how a object its compose
 type Analizer struct {
 	scanner        Scanner
-	objectsSchemas map[string]*models.ObjectSchema
+	objectsSchemas map[string]*ObjectSchema
 }
 
 func BuildAnalizer() *Analizer {
 	return &Analizer{
-		objectsSchemas: make(map[string]*models.ObjectSchema),
+		objectsSchemas: make(map[string]*ObjectSchema),
 	}
 }
 
 //Analize and its depndencies on a recursive maner it will store
 // each object schema in a map so for every object it will traverse
 // the fields as a tree and create individual @ObjectSchema
-func (a Analizer) Analize(component interface{}) *models.ObjectSchema {
+func (a Analizer) Analize(component interface{}) *ObjectSchema {
 
 	//Output channel for schemas
-	ch := make(chan *models.ObjectSchema)
+	ch := make(chan *ObjectSchema)
 
 	// First schema its the object targt
-	var object models.ObjectSchema
+	var object ObjectSchema
 	go func() {
 		// When this function ends we need to close the channel so the
 		// subcriber (the for listining for schemas) will end and we can
@@ -50,11 +45,11 @@ func (a Analizer) Analize(component interface{}) *models.ObjectSchema {
 // for example to a interface where we dont have a concrete type, we can specify
 // " for this interface us this schema"
 // Its also done on a recursive way throughout the tree
-func (a Analizer) GenerateBlueprint(schema *models.ObjectSchema) *models.Blueprint {
-	var out models.Blueprint
+func (a Analizer) GenerateBlueprint(schema *ObjectSchema) *Blueprint {
+	var out Blueprint
 	out.ID = schema.ID
 	out.SchemaID = schema.ID
-	out.Childs = make([]*models.Blueprint, 0)
+	out.Childs = make([]*Blueprint, 0)
 
 	// Start recursion
 	for i, schemaDep := range schema.FieldsMap {
@@ -65,13 +60,13 @@ func (a Analizer) GenerateBlueprint(schema *models.ObjectSchema) *models.Bluepri
 }
 
 //generateBlueprintChildsTree
-func (a Analizer) generateBlueprintChildsTree(schema *models.ObjectSchema, parent *models.Blueprint, index int) {
-	bp := &models.Blueprint{
+func (a Analizer) generateBlueprintChildsTree(schema *ObjectSchema, parent *Blueprint, index int) {
+	bp := &Blueprint{
 
 		ID:       schema.ID,
 		SchemaID: schema.ID,
 		Index:    index,
-		Childs:   make([]*models.Blueprint, 0),
+		Childs:   make([]*Blueprint, 0),
 	}
 
 	parent.Childs = append(parent.Childs, bp)
@@ -82,9 +77,9 @@ func (a Analizer) generateBlueprintChildsTree(schema *models.ObjectSchema, paren
 
 // FindSchema find a schema of a unknow type. creatin a tempSchma of the
 // object passed
-func (a Analizer) FindSchema(obj interface{}) *models.ObjectSchema {
+func (a Analizer) FindSchema(obj interface{}) *ObjectSchema {
 	// Scan object to get a name and ID
-	var tempSchema models.ObjectSchema
+	var tempSchema ObjectSchema
 	a.scanner.Scan(obj, &tempSchema)
 
 	schemaStored := a.objectsSchemas[tempSchema.ID]
@@ -95,11 +90,11 @@ func (a Analizer) FindSchema(obj interface{}) *models.ObjectSchema {
 }
 
 // FindSchemaByID directly search the schema b its key on the map
-func (a Analizer) FindSchemaByID(schemaID string) (schema *models.ObjectSchema, err error) {
+func (a Analizer) FindSchemaByID(schemaID string) (schema *ObjectSchema, err error) {
 
 	schema = a.objectsSchemas[schemaID]
 	if schema == nil {
-		return nil, errors.NewSchemaNotFound(schemaID)
+		return nil, NewSchemaNotFound(schemaID)
 	}
 	return schema, nil
 }

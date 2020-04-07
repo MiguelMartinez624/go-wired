@@ -1,4 +1,4 @@
-package models
+package gowired
 
 // Provider its represents what schema to Use on a certain
 // schema.

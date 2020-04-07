@@ -2,8 +2,6 @@ package gowired
 
 import (
 	"reflect"
-
-	"github.com/miguelmartinez624/go-wired/models"
 )
 
 //Scanner its a wrappr for reflect standar package
@@ -26,14 +24,14 @@ func (s Scanner) FindName(obj interface{}) string {
 }
 
 //ScanDeep scan an object creating @ObjectSchema of it and its fields
-func (c Scanner) ScanDeep(obj interface{}, out *models.ObjectSchema, ch chan *models.ObjectSchema) {
+func (c Scanner) ScanDeep(obj interface{}, out *ObjectSchema, ch chan *ObjectSchema) {
 	c.Scan(obj, out)
 
 	ch <- out
 
 	for i := 0; i < out.Type.NumField(); i++ {
 		dKind := out.Type.Field(i).Type.Kind()
-		var depout models.ObjectSchema
+		var depout ObjectSchema
 
 		if dKind == reflect.Struct {
 
@@ -52,19 +50,20 @@ func (c Scanner) ScanDeep(obj interface{}, out *models.ObjectSchema, ch chan *mo
 }
 
 //Scan scan a typ according to its type
-func (s Scanner) Scan(obj interface{}, out *models.ObjectSchema) {
-	switch obj.(type) {
+func (s Scanner) Scan(obj interface{}, out *ObjectSchema) {
+	switch x := obj.(type) {
+	case string:
+		out.ID = x
+		out.Name = x
 	case reflect.Type:
-		s.buildObject(obj.(reflect.Type), out)
+		s.buildObject(x, out)
 	default:
 
 		oType := reflect.TypeOf(obj)
 		oKind := oType.Kind()
 
 		switch oKind {
-		case reflect.String:
-			out.ID = obj.(string)
-			out.Name = obj.(string)
+
 		case reflect.Struct, reflect.Interface, reflect.Ptr:
 			s.buildObject(oType, out)
 		default:
@@ -74,8 +73,8 @@ func (s Scanner) Scan(obj interface{}, out *models.ObjectSchema) {
 }
 
 // buildObject extract basic info of a type
-func (s Scanner) buildObject(oType reflect.Type, out *models.ObjectSchema) {
-	out.FieldsMap = make(map[int]*models.ObjectSchema)
+func (s Scanner) buildObject(oType reflect.Type, out *ObjectSchema) {
+	out.FieldsMap = make(map[int]*ObjectSchema)
 
 	out.Name = oType.Name()
 	out.Type = oType

@@ -2,9 +2,6 @@ package gowired
 
 import (
 	"reflect"
-
-	"github.com/miguelmartinez624/go-wired/errors"
-	"github.com/miguelmartinez624/go-wired/models"
 )
 
 //Factory its the one who handles the creation of other objects///
@@ -13,8 +10,8 @@ type Factory struct {
 	analizer       *Analizer
 	scanner        *Scanner
 	objectsCreated map[string]interface{}
-	objectSchema   map[string]*models.ObjectSchema
-	providers      map[string]*models.Provider
+	objectSchema   map[string]*ObjectSchema
+	providers      map[string]*Provider
 }
 
 //CreateFactory create a factory this its the constructor function
@@ -25,8 +22,8 @@ func CreateFactory() *Factory {
 		scanner:        &Scanner{},
 		analizer:       BuildAnalizer(),
 		objectsCreated: make(map[string]interface{}),
-		objectSchema:   make(map[string]*models.ObjectSchema),
-		providers:      make(map[string]*models.Provider),
+		objectSchema:   make(map[string]*ObjectSchema),
+		providers:      make(map[string]*Provider),
 	}
 	return factory
 }
@@ -44,7 +41,7 @@ func (f *Factory) CreateBlueprint(schemaID string) (ID string, err error) {
 
 	schema := f.objectSchema[schemaID]
 	if schema == nil {
-		return "", errors.NewSchemaNotFound(schemaID)
+		return "", NewSchemaNotFound(schemaID)
 	}
 
 	blueprint := f.analizer.GenerateBlueprint(schema)
@@ -89,7 +86,7 @@ func (f *Factory) CreateObjectByName(name interface{}) (obj interface{}) {
 // setDependencies iterates though all @FieldDep and using the @Blueprints stored in
 // the map it will procced to create and assign the value field, this its done on a
 // recursive manner so it guarantee the childs tree dependencies are fullfilled too
-func (f *Factory) setDependencies(prtVal reflect.Value, blueprint *models.Blueprint) {
+func (f *Factory) setDependencies(prtVal reflect.Value, blueprint *Blueprint) {
 	//indiect the value of the Ptr to be able to work fields
 	val := reflect.Indirect(prtVal)
 
@@ -116,7 +113,7 @@ func (f *Factory) setDependencies(prtVal reflect.Value, blueprint *models.Bluepr
 }
 
 //BuildObject build and object using a blueprint
-func (f *Factory) BuildObject(blueprint *models.Blueprint) (obj reflect.Value, err error) {
+func (f *Factory) BuildObject(blueprint *Blueprint) (obj reflect.Value, err error) {
 	var schemaToUse string
 
 	// Check if there its a provider to the object, if there its one
@@ -141,7 +138,7 @@ func (f *Factory) RegisterProvider(target interface{}, provider interface{}) {
 	schemaProvider := f.analizer.Analize(provider)
 	targetSchema := f.analizer.FindSchema(target)
 
-	newProvider := &models.Provider{SchemaID: targetSchema.ID, SchemaToUseID: schemaProvider.ID}
+	newProvider := &Provider{SchemaID: targetSchema.ID, SchemaToUseID: schemaProvider.ID}
 
 	f.providers[newProvider.SchemaID] = newProvider
 

@@ -1,4 +1,4 @@
-package models
+package gowired
 
 import "reflect"
 

@@ -1,4 +1,4 @@
-package models
+package gowired
 
 //Blueprint should be a wrapper arround reflect type with fields and everything alrady for easy manipulation
 //and extra data from the tags, some method to add fields and so on.

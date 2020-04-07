@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	gowired "github.com/miguelmartinez624/go-wired"
-	"github.com/miguelmartinez624/go-wired/models"
 )
 
 type ScannerTestFunction = func(f *gowired.Scanner, t *testing.T)
@@ -27,7 +26,7 @@ func ScannerSuite(f *gowired.Scanner, t *testing.T) {
 }
 
 func ScanShouldSuccedTest(s *gowired.Scanner, t *testing.T) {
-	var result models.ObjectSchema
+	var result ObjectSchema
 	s.Scan(GrandChild{}, &result)
 
 	if &result == nil {
@@ -36,7 +35,7 @@ func ScanShouldSuccedTest(s *gowired.Scanner, t *testing.T) {
 }
 
 func ScanShouldGetPackageTest(s *gowired.Scanner, t *testing.T) {
-	var result models.ObjectSchema
+	var result ObjectSchema
 	s.Scan(GrandChild{}, &result)
 
 	if &result == nil {

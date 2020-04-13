@@ -1,19 +1,19 @@
-package gowiredtest
+package factorytest
 
 import (
 	"testing"
 
-	gowired "github.com/miguelmartinez624/go-wired"
+	"github.com/miguelmartinez624/go-wired/factory"
 )
 
-type TestFunction = func(f *gowired.Factory, t *testing.T)
+type TestFunction = func(f *factory.Factory, t *testing.T)
 
 type TestCase struct {
 	Name     string
 	CaseFunc TestFunction
 }
 
-func Suite(f *gowired.Factory, t *testing.T) {
+func Suite(f *factory.Factory, t *testing.T) {
 	ttcc := []TestCase{
 		// {Name: "Flat Dependency", CaseFunc: FlatDependencyTest},
 		// {Name: "Nested Dependency", CaseFunc: NestedDependencyTest},
@@ -26,7 +26,7 @@ func Suite(f *gowired.Factory, t *testing.T) {
 }
 
 //FlatDependencyTest 1 level dependency test
-// func FlatDependencyTest(f *gowired.Factory, t *testing.T) {
+// func FlatDependencyTest(f *factory.Factory, t *testing.T) {
 
 // 	f.CreateBlueprint(false, ComponentOne{}, "")
 // 	componentOne := f.CreateObjectByName(ComponentOne{}).(*ComponentOne)
@@ -42,7 +42,7 @@ func Suite(f *gowired.Factory, t *testing.T) {
 // }
 
 //NestedDependencyTest 2 level dependency test
-// func NestedDependencyTest(f *gowired.Factory, t *testing.T) {
+// func NestedDependencyTest(f *factory.Factory, t *testing.T) {
 
 // 	f.CreateBlueprint(false, ComponentTwo{}, "")
 // 	componentTwo := f.CreateObjectByName(ComponentTwo{}).(*ComponentTwo)
@@ -63,7 +63,7 @@ func Suite(f *gowired.Factory, t *testing.T) {
 // }
 
 //NestedDependencyTest 2 level dependency test
-func BuildInstructionsTest(f *gowired.Factory, t *testing.T) {
+func BuildInstructionsTest(f *factory.Factory, t *testing.T) {
 	// f.SetBuildInstruction(&models.BuildInstruction{
 	// 	Name:   "Default",
 	// 	Target: ComponentOne{},
@@ -80,7 +80,7 @@ func BuildInstructionsTest(f *gowired.Factory, t *testing.T) {
 }
 
 func TestFacory(t *testing.T) {
-	factory := gowired.CreateFactory()
+	factory := factory.CreateFactory()
 
 	Suite(factory, t)
 }

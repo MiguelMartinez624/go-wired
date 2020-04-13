@@ -1,4 +1,4 @@
-package gowiredtest
+package factorytest
 
 import "fmt"
 

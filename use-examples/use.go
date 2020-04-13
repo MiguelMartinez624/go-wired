@@ -1,18 +1,18 @@
 package main
 
 import (
-	gowired "github.com/miguelmartinez624/go-wired"
-	gowiredtest "github.com/miguelmartinez624/go-wired/tests"
+	factory "github.com/miguelmartinez624/go-wired"
+	factorytest "github.com/miguelmartinez624/go-wired/tests"
 )
 
 func main() {
 	for i := 0; i < 1000; i++ {
-		f := gowired.CreateFactory()
-		f.RegisterObject(gowiredtest.ComponentOne{})
+		f := factory.CreateFactory()
+		f.RegisterObject(factorytest.ComponentOne{})
 
-		f.RegisterProvider("github.com/miguelmartinez624/go-wired/tests.Dummer", gowiredtest.BasicDummer{})
+		f.RegisterProvider("github.com/miguelmartinez624/go-wired/tests.Dummer", factorytest.BasicDummer{})
 
-		c := f.CreateObjectByName(gowiredtest.ComponentOne{}).(*gowiredtest.ComponentOne)
+		c := f.CreateObjectByName(factorytest.ComponentOne{}).(*factorytest.ComponentOne)
 		c.DrummerImpl.Dumb()
 	}
 }

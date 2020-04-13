@@ -34,7 +34,7 @@ The blueprint can be create by the  Factory with the `CreateBlueprint` method:
 
 ```go
   //Initialize the factory
-    factory := gowired.CreateFactory()
+    factory := factory.CreateFactory()
 
     //Register this component with the name 'ComponentTwo'
 	factory.CreateBlueprint(true, ComponentTwo{}, "ComponentTwo")

@@ -1,4 +1,4 @@
-package gowired
+package factory
 
 //Analizer has the funcionality to scan and create blueprints and schemas of
 // objects that can be use to know how a object its compose

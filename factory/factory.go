@@ -1,4 +1,4 @@
-package gowired
+package factory
 
 import (
 	"reflect"
@@ -134,11 +134,27 @@ func (f *Factory) BuildObject(blueprint *Blueprint) (obj reflect.Value, err erro
 }
 
 //  RegisterProvider way to store a provider
-func (f *Factory) RegisterProvider(target interface{}, provider interface{}) {
+func (f *Factory) RegisterProviderSchema(target interface{}, provider interface{}) {
 	schemaProvider := f.analizer.Analize(provider)
 	targetSchema := f.analizer.FindSchema(target)
 
 	newProvider := &Provider{SchemaID: targetSchema.ID, SchemaToUseID: schemaProvider.ID}
+
+	f.providers[newProvider.SchemaID] = newProvider
+
+}
+
+//  RegisterProvider way to store a provider
+func (f *Factory) RegisterProviderInstance(target interface{}, provider interface{}) {
+	schemaProvider := f.analizer.Analize(provider)
+	targetSchema := f.analizer.FindSchema(target)
+
+	newProvider := &Provider{
+		SchemaID:      targetSchema.ID,
+		SchemaToUseID: schemaProvider.ID,
+		ItsSingleton:  true,
+		Instance:      provider,
+	}
 
 	f.providers[newProvider.SchemaID] = newProvider
 

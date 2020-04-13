@@ -1,4 +1,4 @@
-package gowired
+package factory
 
 type FactoryWorker struct {
 }

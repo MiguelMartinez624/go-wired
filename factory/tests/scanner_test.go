@@ -1,19 +1,19 @@
-package gowiredtest
+package factorytest
 
 import (
 	"testing"
 
-	gowired "github.com/miguelmartinez624/go-wired"
+	"github.com/miguelmartinez624/go-wired/factory"
 )
 
-type ScannerTestFunction = func(f *gowired.Scanner, t *testing.T)
+type ScannerTestFunction = func(f *factory.Scanner, t *testing.T)
 
 type ScannerTestCase struct {
 	Name     string
 	CaseFunc ScannerTestFunction
 }
 
-func ScannerSuite(f *gowired.Scanner, t *testing.T) {
+func ScannerSuite(f *factory.Scanner, t *testing.T) {
 	ttcc := []ScannerTestCase{
 		{Name: "Scan Test", CaseFunc: ScanShouldSuccedTest},
 		{Name: "Package Path imformation", CaseFunc: ScanShouldGetPackageTest},
@@ -25,8 +25,8 @@ func ScannerSuite(f *gowired.Scanner, t *testing.T) {
 	}
 }
 
-func ScanShouldSuccedTest(s *gowired.Scanner, t *testing.T) {
-	var result ObjectSchema
+func ScanShouldSuccedTest(s *factory.Scanner, t *testing.T) {
+	var result factory.ObjectSchema
 	s.Scan(GrandChild{}, &result)
 
 	if &result == nil {
@@ -34,8 +34,8 @@ func ScanShouldSuccedTest(s *gowired.Scanner, t *testing.T) {
 	}
 }
 
-func ScanShouldGetPackageTest(s *gowired.Scanner, t *testing.T) {
-	var result ObjectSchema
+func ScanShouldGetPackageTest(s *factory.Scanner, t *testing.T) {
+	var result factory.ObjectSchema
 	s.Scan(GrandChild{}, &result)
 
 	if &result == nil {
@@ -53,6 +53,6 @@ func ScanShouldGetPackageTest(s *gowired.Scanner, t *testing.T) {
 }
 
 func TestScanner(t *testing.T) {
-	scanner := &gowired.Scanner{}
+	scanner := &factory.Scanner{}
 	ScannerSuite(scanner, t)
 }

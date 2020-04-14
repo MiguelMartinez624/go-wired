@@ -1,71 +1,54 @@
+# Factory
 
-Dependency injection tool for go programs (golang).
-
-DI handles the life cycle of the objects in your application. It creates them when they are needed, resolves their dependencies and closes them properly when they are no longer used.
-
-If you do not know if DI could help improving your application, learn more about dependency injection and dependency injection containers:
-
-- [What is a dependency injection container and why use one ?](https://www.sarulabs.com/post/2/2018-06-12/what-is-a-dependency-injection-container-and-why-use-one.html)
-
-There is also an [Examples](#examples) section at the end of the documentation.
-
-DI is focused on performance. It does not rely on reflection.
+Factory its a small and simple package to build objects in a easy way, also allow to handle its dependencies especifing providers for a field Type.
 
 
-# Table of contents
+### Installing
 
+A step by step series of examples that tell you how to get a development env running
 
-- [Basic usage](#basic-usage)
-	* [Object Blueprint](#object-blueprint)
-	* [Object Creation](#object-creation)
+Say what the step will be
 
-- [Errors](#errors)
-
-
-
-# Basic usage
-
-## Object Blueprint
-
-A Blueprint contains a the data necesary to build and object its extracted using the 'reflect' library, and you can add one just by passing and object to be analize it.
-
-
-The blueprint can be create by the  Factory with the `CreateBlueprint` method:
-
-```go
-  //Initialize the factory
-    factory := factory.CreateFactory()
-
-    //Register this component with the name 'ComponentTwo'
-	factory.CreateBlueprint(true, ComponentTwo{}, "ComponentTwo")
+```
+go get github.com/miguelmartinez624/go-wired/factory 
 ```
 
-The object you pass to this method will be analized generating a blueprint that will be stored, this process
-will look for dependences field and will create blueprint for any field of type `struct`, this will be inyected
-later on with a default zero value of the struct  
 
+## Usage
+The Factory its really simple to use, you just create a instance of the factory, each factory 
+instance asolate its schemas and objects, so you can use it as a container if you want too.
 
-## Object Creation
-
-Once the blueprints have been added to a Factory, the Factory can start creating objects.
-
-```go
-    // you can pass and object and will return a instnace of the same kind with all its
-    //dependencies
-    componentOne := factory.CreateObjectByName(ComponentTwo{}).(*ComponentTwo)
-
-    //or pass a string
-	componentOne := factory.CreateObjectByName("ComponentTwo").(*ComponentTwo)
+```
+  // Create a factory instance
+	f := factory.CreateFactory()
 
 ```
 
-The `CreateObjectByName` method returns an `interface{}`. You need to cast the interface before using the object.
+After creating a factory you must create a schema of the object that you want to create using the 
+**GenerateObjectSchema** method
 
+```
+	// Component one will be analize and registered
+  f.GenerateObjectSchema(ComponentOne{})
 
+```
+Now you can create an object of that type by using the **CreateObjectByName** method and remember
+to cast the result to the type you are building this its becouse the method return a **interface{}**
+in order to use it as the type you are specting you must casted to that type.
 
+```
+  // Create the object and () cast
+	c := f.CreateObjectByName(factorytest.ComponentOne{}).(*factorytest.ComponentOne)
 
+```
+## Authors
 
-## Errors
+* **Miguel Martinez** - *Initial work* - [MiguelMartinez624](https://github.com/MiguelMartinez624)
 
-`BlueprintNotFound` : when you try to Create and object that its not been registered on the factory
+See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
 

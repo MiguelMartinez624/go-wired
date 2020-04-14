@@ -40,41 +40,6 @@ func (a Analizer) Analize(component interface{}) *ObjectSchema {
 	return &object
 }
 
-// GenerateBlueprint take a schema and make a simplifier version with only ID of the
-// schema and the schema to use, this will allow futher on to change what schema to use
-// for example to a interface where we dont have a concrete type, we can specify
-// " for this interface us this schema"
-// Its also done on a recursive way throughout the tree
-func (a Analizer) GenerateBlueprint(schema *ObjectSchema) *Blueprint {
-	var out Blueprint
-	out.ID = schema.ID
-	out.SchemaID = schema.ID
-	out.Childs = make([]*Blueprint, 0)
-
-	// Start recursion
-	for i, schemaDep := range schema.FieldsMap {
-		a.generateBlueprintChildsTree(schemaDep, &out, i)
-	}
-
-	return &out
-}
-
-//generateBlueprintChildsTree
-func (a Analizer) generateBlueprintChildsTree(schema *ObjectSchema, parent *Blueprint, index int) {
-	bp := &Blueprint{
-
-		ID:       schema.ID,
-		SchemaID: schema.ID,
-		Index:    index,
-		Childs:   make([]*Blueprint, 0),
-	}
-
-	parent.Childs = append(parent.Childs, bp)
-	for i, schemaDep := range schema.FieldsMap {
-		a.generateBlueprintChildsTree(schemaDep, bp, i)
-	}
-}
-
 // FindSchema find a schema of a unknow type. creatin a tempSchma of the
 // object passed
 func (a Analizer) FindSchema(obj interface{}) *ObjectSchema {

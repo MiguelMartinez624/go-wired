@@ -1,18 +1,29 @@
 package main
 
 import (
-	factory "github.com/miguelmartinez624/go-wired"
-	factorytest "github.com/miguelmartinez624/go-wired/tests"
+	"fmt"
+
+	factory "github.com/miguelmartinez624/go-wired/factory"
+	factorytest "github.com/miguelmartinez624/go-wired/factory/tests"
 )
 
+type InstanceLoca struct {
+	Name string
+}
+
+func (i InstanceLoca) Dumb() {
+	fmt.Print("LOOOOOOOOOOOL")
+}
+
 func main() {
-	for i := 0; i < 1000; i++ {
-		f := factory.CreateFactory()
-		f.RegisterObject(factorytest.ComponentOne{})
+	u := InstanceLoca{Name: "LE ORIGINAL"}
+	// for i := 0; i < 1000; i++ {
+	f := factory.CreateFactory()
+	f.GenerateObjectSchema(factorytest.ComponentOne{})
 
-		f.RegisterProvider("github.com/miguelmartinez624/go-wired/tests.Dummer", factorytest.BasicDummer{})
+	f.RegisterProviderInstance("github.com/miguelmartinez624/go-wired/factory/tests.Dummer", u)
 
-		c := f.CreateObjectByName(factorytest.ComponentOne{}).(*factorytest.ComponentOne)
-		c.DrummerImpl.Dumb()
-	}
+	c := f.CreateObjectByName(factorytest.ComponentOne{}).(*factorytest.ComponentOne)
+	// }
+	fmt.Println(c.DrummerImpl)
 }

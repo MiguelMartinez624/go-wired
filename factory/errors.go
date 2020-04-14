@@ -23,3 +23,16 @@ type BlueprintNotFound struct {
 func (e BlueprintNotFound) Error() string {
 	return fmt.Sprintf("There is not a Blueprint for [%v] registered on the factory.", e.BlueprintName)
 }
+
+// ProviderNotFound schema not found
+type ProviderNotFound struct {
+	Selector string
+}
+
+func NewProviderNotFound(selector string) *ProviderNotFound {
+	return &ProviderNotFound{Selector: selector}
+}
+
+func (e ProviderNotFound) Error() string {
+	return fmt.Sprintf("There is not a provider for [%v].", e.Selector)
+}

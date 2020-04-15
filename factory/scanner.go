@@ -60,6 +60,7 @@ func (s Scanner) Scan(obj interface{}, out *ObjectSchema) {
 		out.ID = x
 		out.Name = x
 	case reflect.Type:
+		out.Kind = obj.(reflect.Type).Kind()
 		s.buildObject(x, out)
 	default:
 

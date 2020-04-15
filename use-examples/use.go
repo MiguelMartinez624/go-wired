@@ -19,11 +19,11 @@ func main() {
 	u := InstanceLoca{Name: "LE ORIGINAL"}
 	// for i := 0; i < 1000; i++ {
 	f := factory.CreateFactory()
-	f.GenerateObjectSchema(factorytest.ComponentOne{})
+	f.GenerateObjectSchema(factorytest.ComponentTwo{})
 
 	f.RegisterProviderInstance("github.com/miguelmartinez624/go-wired/factory/tests.Dummer", u)
 
-	c := f.CreateObjectByName(factorytest.ComponentOne{}).(*factorytest.ComponentOne)
+	c := f.CreateObjectByName(factorytest.ComponentTwo{}).(*factorytest.ComponentTwo)
 	// }
-	fmt.Println(c.DrummerImpl)
+	fmt.Println(c.DependencyOne.DrummerImpl)
 }

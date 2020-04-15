@@ -34,7 +34,6 @@ func (a Analizer) Analize(component interface{}) *ObjectSchema {
 	}()
 
 	// Here we listing to schemas and write to the @ObjectSchema map
-	//
 	for schema := range ch {
 		a.objectsSchemas[schema.ID] = schema
 	}

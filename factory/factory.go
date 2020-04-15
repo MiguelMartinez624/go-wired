@@ -2,10 +2,11 @@ package factory
 
 //Factory its the one who handles the creation of other objects///
 type Factory struct {
-	analizer       *Analizer
-	scanner        *Scanner
-	worker         *Worker
-	providerLine   *providerLine
+	analizer     *Analizer
+	scanner      *Scanner
+	worker       *Worker
+	providerLine *providerLine
+	// probably remove later
 	objectsCreated map[string]interface{}
 	objectSchema   map[string]*ObjectSchema
 }

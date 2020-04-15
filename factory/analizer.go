@@ -1,5 +1,7 @@
 package factory
 
+import "fmt"
+
 //Analizer has the funcionality to scan and create blueprints and schemas of
 // objects that can be use to know how a object its compose
 type Analizer struct {
@@ -49,7 +51,7 @@ func (a Analizer) FindSchema(obj interface{}) *ObjectSchema {
 
 	schemaStored := a.objectsSchemas[tempSchema.ID]
 	if schemaStored == nil {
-		panic("no found")
+		panic(fmt.Sprintf("no found schema for %v", tempSchema.ID))
 	}
 	return schemaStored
 }

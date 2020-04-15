@@ -28,6 +28,10 @@ func (c Scanner) ScanDeep(obj interface{}, out *ObjectSchema, ch chan *ObjectSch
 	c.Scan(obj, out)
 
 	ch <- out
+	//If its not a struct it wont have fields
+	if out.Kind != reflect.Struct {
+		return
+	}
 
 	for i := 0; i < out.Type.NumField(); i++ {
 		dKind := out.Type.Field(i).Type.Kind()

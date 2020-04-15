@@ -64,9 +64,9 @@ func (s Scanner) Scan(obj interface{}, out *ObjectSchema) {
 	default:
 
 		oType := reflect.TypeOf(obj)
-		oKind := oType.Kind()
+		out.Kind = oType.Kind()
 
-		switch oKind {
+		switch out.Kind {
 
 		case reflect.Struct, reflect.Interface, reflect.Ptr:
 			s.buildObject(oType, out)
